@@ -1,0 +1,22 @@
+﻿# ---- 构建产物（只保留 Web 部署目录）----
+/build/*
+!/build/web/
+
+# ---- 安装包与签名材料（绝不入库）----
+*.apk
+*.idsig
+*.keystore
+*.jks
+
+# ---- Netlify ----
+.netlify/
+
+# ---- Python ----
+__pycache__/
+*.pyc
+
+# ---- 系统与编辑器 ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

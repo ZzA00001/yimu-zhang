@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#F7F6F2" />
+<title>一目账</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="sheet-layer" id="sheetLayer" aria-hidden="true"></div>
+<div class="inst-tip" id="instTip">
+  <div class="txt" id="instTxt"></div>
+  <button id="instBtn" type="button">安装</button>
+  <button id="instClose" type="button" aria-label="关闭">✕</button>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+<script>
+(function () {
+  var secure = location.protocol === 'https:' || location.hostname === 'localhost' ||
+      location.hostname === '127.0.0.1';
+  if ('serviceWorker' in navigator && secure) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js')['catch'](function () {});
+    });
+  }
+  /* Netlify injects a "Powered by Netlify" badge iframe at runtime - drop it */
+  function killNfBadge() {
+    var nodes = document.querySelectorAll(
+      '#nl-badge-frame, #nl-hud-frame, iframe[title="Powered by Netlify"], ' +
+      'iframe[title="Netlify"], iframe[src*=".netlify/"], iframe[style*="2147483645"]');
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      try { n.style.setProperty('display', 'none', 'important'); } catch (e) {}
+      try { n.setAttribute('aria-hidden', 'true'); } catch (e) {}
+      try { if (n.parentNode) n.parentNode.removeChild(n); } catch (e) {}
+    }
+  }
+  killNfBadge();
+  try {
+    new MutationObserver(killNfBadge).observe(document.documentElement,
+      { childList: true, subtree: true });
+  } catch (e) {}
+  window.addEventListener('load', killNfBadge);
+  setTimeout(killNfBadge, 800);
+  setTimeout(killNfBadge, 2000);
+  setInterval(killNfBadge, 600);
+
+  var tip = document.getElementById('instTip');
+  var txt = document.getElementById('instTxt');
+  var btn = document.getElementById('instBtn');
+  var close = document.getElementById('instClose');
+  if (!tip) return;
+
+  var ua = navigator.userAgent || '';
+  var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isSafari = isIOS && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+  var standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  var dismissed = false;
+  try { dismissed = localStorage.getItem('yimu.instTip') === 'off'; } catch (e) {}
+
+  function hide(mark) {
+    tip.className = 'inst-tip';
+    if (mark) { try { localStorage.setItem('yimu.instTip', 'off'); } catch (e) {} }
+  }
+  close.onclick = function () { hide(true); };
+
+  if (standalone || dismissed) return;
+
+  if (isSafari) {
+    txt.innerHTML = '在 Safari 底部点 <b>分享</b> → <b>添加到主屏幕</b>，可全屏离线使用';
+    btn.textContent = '知道了';
+    btn.onclick = function () { hide(true); };
+    setTimeout(function () { tip.className = 'inst-tip show'; }, 1500);
+    return;
+  }
+
+  var prompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    prompt = e;
+    txt.innerHTML = '添加到主屏幕，像 App 一样全屏使用，断网也能记账';
+    btn.textContent = '添加';
+    tip.className = 'inst-tip show';
+  });
+  btn.onclick = function () {
+    hide(true);
+    if (prompt) { try { prompt.prompt(); } catch (e) {} }
+  };
+  window.addEventListener('appinstalled', function () { hide(true); });
+})();
+</script>
+</body>
+</html>
