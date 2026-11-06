@@ -6,6 +6,8 @@
 - 版本：1.0.0（versionCode 1）
 - 支持：Android 6.0 及以上（minSdk 23 / targetSdk 34）
 - 安装包：`build/yimu-zhang.apk`
+- 在线使用（PWA，可添加到主屏幕）：https://zza00001.github.io/yimu-zhang/
+- 源码仓库：https://github.com/ZzA00001/yimu-zhang
 
 ## 为什么做它
 
